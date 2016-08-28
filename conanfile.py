@@ -11,6 +11,7 @@ class PortaudioConan(ConanFile):
     FOLDER_NAME = "portaudio_%s" % version.replace(".", "_")
     url="https://github.com/jgsogo/conan-portaudio"
     license=""  # TODO: Check licence
+    exports = ["FindPortaudio.cmake",]
 
     def system_requirements(self):
         pack_name = None
@@ -46,9 +47,17 @@ class PortaudioConan(ConanFile):
             self.run(build_command)
 
     def package(self):
+        self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
         self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib"))
         self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
 
     def package_info(self):
-        self.cpp_info.libs = ["portaudio"]
+        if self.settings.os == "Linux" or self.settings.os == "Macos":
+            self.cpp_info.libs = ["portaudio"]
+        else:
+            if self.settings.arch == "x86":
+                self.cpp_info.libs = ["portaudio_x86"]
+            else:
+                self.cpp_info.libs = ["portaudio_x64"]
+
