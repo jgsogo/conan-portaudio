@@ -57,7 +57,13 @@ class PortaudioConan(ConanFile):
             if self.options.shared:
                 self.copy("*.dll", dst="bin", src=os.path.join(self.FOLDER_NAME, self.settings.build_type), keep_path=False)
         else:
-            self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"), keep_path=False)
+            if self.options.shared:
+                if self.settings.os == "Macos":
+                    self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+                else:
+                    self.copy(pattern="*.so*", dst="lib", src=self.ZIP_FOLDER_NAME, keep_path=False)
+            else:
+                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"), keep_path=False)
 
     def package_info(self):
         base_name = "portaudio"
