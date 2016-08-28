@@ -12,6 +12,8 @@ class PortaudioConan(ConanFile):
     url="https://github.com/jgsogo/conan-portaudio"
     license=""  # TODO: Check licence
     exports = ["FindPortaudio.cmake",]
+    options = {"shared": [True, False]}
+    default_options = "shared=False"
 
     def system_requirements(self):
         pack_name = None
@@ -49,15 +51,20 @@ class PortaudioConan(ConanFile):
     def package(self):
         self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
-        self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib"))
-        self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+
+        if self.settings.os == "Windows":
+            self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, self.settings.build_type), keep_path=False)
+            if self.options.shared:
+                self.copy("*.dll", dst="bin", src=os.path.join(self.FOLDER_NAME, self.settings.build_type), keep_path=False)
+        else:
+            self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"), keep_path=False)
 
     def package_info(self):
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.libs = ["portaudio"]
-        else:
-            if self.settings.arch == "x86":
-                self.cpp_info.libs = ["portaudio_x86"]
-            else:
-                self.cpp_info.libs = ["portaudio_x64"]
+        base_name = "portaudio"
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                base_name += "_static"
+            base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+
+        self.cpp_info.libs = [base_name,]
 
