@@ -30,20 +30,20 @@ class PortaudioConan(ConanFile):
             command = './configure && make'
             self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
+            build_dirname = "_build"
             cmake = CMake(self.settings)
             if self.settings.os == "Windows":
-                self.run("IF not exist _build mkdir _build")
+                self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
             else:
-                self.run("mkdir _build")
-            cd_build = "cd _build"
-            self.output.warn('%s && cmake .. %s' % (cd_build, cmake.command_line))
-            self.run('%s && cmake .. %s' % (cd_build, cmake.command_line))
-            self.output.warn("%s && cmake --build . %s" % (cd_build, cmake.build_config))
-            self.run("%s && cmake --build . %s" % (cd_build, cmake.build_config))
+                self.run("mkdir {}".format(build_dirname))
+            self.output.warn('cd {} && cmake {} {}'.format(build_dirname, os.path.join("..", self.FOLDER_NAME), cmake.command_line))
+            self.run('cd {} && cmake {} {}'.format(build_dirname, os.path.join("..", self.FOLDER_NAME), cmake.command_line))
+            self.output.warn("cd {} && cmake --build . {}".format(build_dirname, cmake.build_config))
+            self.run("cd {} && cmake --build . {}".format(build_dirname, cmake.build_config))
 
     def package(self):
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
-        # self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib"))
+        self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib"))
         self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
 
     def package_info(self):
