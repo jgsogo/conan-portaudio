@@ -11,9 +11,10 @@ class PortaudioConan(ConanFile):
     FOLDER_NAME = "portaudio_%s" % version.replace(".", "_")
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
-    exports = ["FindPortaudio.cmake",]
     options = {"shared": [True, False]}
     default_options = "shared=False"
+
+    WIN = {'build_dirname': "_build"}
 
     def system_requirements(self):
         pack_name = None
@@ -33,7 +34,7 @@ class PortaudioConan(ConanFile):
             command = './configure && make'
             self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
-            build_dirname = "_build"
+            build_dirname = self.WIN['build_dirname']
             cmake = CMake(self.settings)
             if self.settings.os == "Windows":
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
@@ -49,21 +50,20 @@ class PortaudioConan(ConanFile):
             self.run(build_command)
 
     def package(self):
-        self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
-
         if self.settings.os == "Windows":
-            self.copy("*.lib", dst="lib", src=os.path.join(self.FOLDER_NAME, self.settings.build_type), keep_path=False)
+            build_dirname = self.WIN['build_dirname']
+            self.copy("*.lib", dst="lib", src=os.path.join(build_dirname, str(self.settings.build_type)))
             if self.options.shared:
-                self.copy("*.dll", dst="bin", src=os.path.join(self.FOLDER_NAME, self.settings.build_type), keep_path=False)
+                self.copy("*.dll", dst="bin", src=os.path.join(build_dirname, str(self.settings.build_type)))
         else:
             if self.options.shared:
                 if self.settings.os == "Macos":
-                    self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+                    self.copy(pattern="*.dylib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
                 else:
-                    self.copy(pattern="*.so*", dst="lib", src=self.ZIP_FOLDER_NAME, keep_path=False)
+                    self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
             else:
-                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"), keep_path=False)
+                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
 
     def package_info(self):
         base_name = "portaudio"
@@ -71,6 +71,5 @@ class PortaudioConan(ConanFile):
             if not self.options.shared:
                 base_name += "_static"
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
-
         self.cpp_info.libs = [base_name]
 
