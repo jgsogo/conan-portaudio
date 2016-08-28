@@ -32,10 +32,6 @@ matrix:
          osx_image: xcode6.4 # apple-clang 6.1
          language: generic
          env:
-       - os: osx
-         osx_image: xcode6.2 # apple-clang 6.0
-         language: generic
-         env:
 
 install:
   - ./.travis/install.sh
