@@ -9,8 +9,8 @@ class PortaudioConan(ConanFile):
     version = "master"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio_%s" % version.replace(".", "_")
-    url="https://github.com/jgsogo/conan-portaudio"
-    license=""  # TODO: Check licence
+    url = "https://github.com/jgsogo/conan-portaudio"
+    license = "http://www.portaudio.com/license.html"
     exports = ["FindPortaudio.cmake",]
     options = {"shared": [True, False]}
     default_options = "shared=False"
