@@ -15,7 +15,7 @@ class PortaudioConan(ConanFile):
     def system_requirements(self):
         pack_name = None
         if os_info.is_linux:
-            pack_name = "libasound-dev"
+            pack_name = "libasound2-dev"
 
         if pack_name:
             installer = SystemPackageTool()
@@ -27,12 +27,7 @@ class PortaudioConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            configure_args = ""
-            if self.settings.arch == 'x86':
-                configure_args = 'CC="gcc -m32" CXX="g++ -m32"'
-            else:
-                configure_args = 'CC="gcc -m64" CXX="g++ -m64"'
-            command = './configure {} && make'.format(configure_args)
+            command = './configure && make'
             self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
             build_dirname = "_build"
@@ -41,10 +36,14 @@ class PortaudioConan(ConanFile):
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
             else:
                 self.run("mkdir {}".format(build_dirname))
-            self.output.warn('cd {} && cmake {} {}'.format(build_dirname, os.path.join("..", self.FOLDER_NAME), cmake.command_line))
-            self.run('cd {} && cmake {} {}'.format(build_dirname, os.path.join("..", self.FOLDER_NAME), cmake.command_line))
-            self.output.warn("cd {} && cmake --build . {}".format(build_dirname, cmake.build_config))
-            self.run("cd {} && cmake --build . {}".format(build_dirname, cmake.build_config))
+
+            cmake_command = 'cd {} && cmake {} {}'.format(build_dirname, os.path.join("..", self.FOLDER_NAME), cmake.command_line)
+            self.output.info(cmake_command)
+            self.run(cmake_command)
+
+            build_command = "cd {} && cmake --build . {}".format(build_dirname, cmake.build_config)
+            self.output.info(build_command)
+            self.run(build_command)
 
     def package(self):
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
