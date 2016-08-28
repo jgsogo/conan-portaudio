@@ -72,5 +72,5 @@ class PortaudioConan(ConanFile):
                 base_name += "_static"
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
 
-        self.cpp_info.libs = [base_name,]
+        self.cpp_info.libs = [base_name]
 
