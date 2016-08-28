@@ -1,6 +1,6 @@
 
 import os
-from conans import ConanFile
+from conans import ConanFile, CMake
 from conans.tools import os_info, SystemPackageTool
 
 
@@ -26,11 +26,20 @@ class PortaudioConan(ConanFile):
         self.run("git clone https://git.assembla.com/portaudio.git {}".format(self.FOLDER_NAME))
 
     def build(self):
-        command = None
-        if os_info.is_linux:
+        if self.settings.os == "Linux" or self.settings.os == "Macos":
             command = './configure && make'
-        # TODO: Compile for windows
-        self.run("cd %s && %s" % (self.FOLDER_NAME, command))
+            self.run("cd %s && %s" % (self.FOLDER_NAME, command))
+        else:
+            cmake = CMake(self.settings)
+            if self.settings.os == "Windows":
+                self.run("IF not exist _build mkdir _build")
+            else:
+                self.run("mkdir _build")
+            cd_build = "cd _build"
+            self.output.warn('%s && cmake .. %s' % (cd_build, cmake.command_line))
+            self.run('%s && cmake .. %s' % (cd_build, cmake.command_line))
+            self.output.warn("%s && cmake --build . %s" % (cd_build, cmake.build_config))
+            self.run("%s && cmake --build . %s" % (cd_build, cmake.build_config))
 
     def package(self):
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
