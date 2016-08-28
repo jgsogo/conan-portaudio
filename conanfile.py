@@ -10,7 +10,6 @@ class PortaudioConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio_%s" % version.replace(".", "_")
     url="https://github.com/jgsogo/conan-portaudio"
-    # exports = ["FindPortaudio.cmake"]
     license=""  # TODO: Check licence
 
     def system_requirements(self):
@@ -20,14 +19,17 @@ class PortaudioConan(ConanFile):
 
         if pack_name:
             installer = SystemPackageTool()
-            installer.update() # Update the package database
-            installer.install(pack_name) # Install the package
+            installer.update()  # Update the package database
+            installer.install(pack_name)  # Install the package
 
     def source(self):
         self.run("git clone https://git.assembla.com/portaudio.git {}".format(self.FOLDER_NAME))
 
     def build(self):
-        command = './configure && make'
+        command = None
+        if os_info.is_linux:
+            command = './configure && make'
+        # TODO: Compile for windows
         self.run("cd %s && %s" % (self.FOLDER_NAME, command))
 
     def package(self):
