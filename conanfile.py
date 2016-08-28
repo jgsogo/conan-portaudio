@@ -27,7 +27,12 @@ class PortaudioConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            command = './configure && make'
+            configure_args = ""
+            if self.settings.arch == 'x86':
+                configure_args = 'CC="gcc -m32" CXX="g++ -m32"'
+            else:
+                configure_args = 'CC="gcc -m64" CXX="g++ -m64"'
+            command = './configure {} && make'.format(configure_args)
             self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
             build_dirname = "_build"
