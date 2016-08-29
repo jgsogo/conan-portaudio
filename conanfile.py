@@ -1,14 +1,14 @@
 
 import os
 from conans import ConanFile, CMake
-from conans.tools import os_info, SystemPackageTool
+from conans.tools import os_info, SystemPackageTool, download, untargz
 
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
-    version = "master"
+    version = "v19.20140130"
     settings = "os", "compiler", "build_type", "arch"
-    FOLDER_NAME = "portaudio_%s" % version.replace(".", "_")
+    FOLDER_NAME = "portaudio"
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
     options = {"shared": [True, False]}
@@ -28,7 +28,13 @@ class PortaudioConan(ConanFile):
             installer.install(pack_name)  # Install the package
 
     def source(self):
-        self.run("git clone https://git.assembla.com/portaudio.git {}".format(self.FOLDER_NAME))
+        zip_name = 'portaudio_v19_20140130.tgz'
+        url = 'http://portaudio.com/archives/pa_stable_v19_20140130.tgz'
+        download(url, zip_name)
+        untargz(zip_name)  # Creates a portaudio directory
+        os.unlink(zip_name)
+        if self.settings.os != "Windows":
+            self.run("chmod +x ./%s/configure" % self.FOLDER_NAME)
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":

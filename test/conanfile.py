@@ -9,7 +9,7 @@ username = os.getenv("CONAN_USERNAME", "jgsogo")
 
 class HelloReuseConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "portaudio/master@%s/%s" % (username, channel)
+    requires = "portaudio/v19.20140130@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):
