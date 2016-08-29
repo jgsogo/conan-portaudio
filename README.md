@@ -11,3 +11,6 @@ The packages generated with this **conanfile** can be found in [conan.io](https:
  * Unix/Macos: [![Build Status](https://travis-ci.org/jgsogo/conan-portaudio.svg?branch=master)](https://travis-ci.org/jgsogo/conan-portaudio)
 
 
+## Usage
+
+Working example can be checked out from `test` directory.
