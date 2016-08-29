@@ -14,6 +14,7 @@ class PortaudioConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
     exports = ["FindPortaudio.cmake",]
+    build_policy = "always"  # Master is always built against the last revision from the repository.
 
     WIN = {'build_dirname': "_build"}
 

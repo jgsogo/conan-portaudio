@@ -13,4 +13,5 @@ The packages generated with this **conanfile** can be found in [conan.io](https:
 
 ## Usage
 
-Working example can be checked out from `test` directory.
+Working example can be checked out from `test` directory. This `master` version use last revision from
+the Portaudio repository.
