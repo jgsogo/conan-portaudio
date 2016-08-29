@@ -1,7 +1,7 @@
 
 import os
 from conans import ConanFile, CMake
-from conans.tools import os_info, SystemPackageTool, download, untargz
+from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
 
 
 class PortaudioConan(ConanFile):
@@ -41,6 +41,9 @@ class PortaudioConan(ConanFile):
             command = './configure && make'
             self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
+            # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
+            replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
+
             build_dirname = self.WIN['build_dirname']
             cmake = CMake(self.settings)
             if self.settings.os == "Windows":
