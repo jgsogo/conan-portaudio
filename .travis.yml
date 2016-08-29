@@ -6,7 +6,7 @@ language: python
 env:
   global:
     - CONAN_UPLOAD=1
-    - CONAN_REFERENCE="portaudio/master"
+    - CONAN_REFERENCE="portaudio/v19.20140130"
     - CONAN_USERNAME="jgsogo"
     - CONAN_CHANNEL="ci"
     - CONAN_TOTAL_PAGES=1
