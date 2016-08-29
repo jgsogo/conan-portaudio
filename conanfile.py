@@ -13,6 +13,7 @@ class PortaudioConan(ConanFile):
     license = "http://www.portaudio.com/license.html"
     options = {"shared": [True, False]}
     default_options = "shared=False"
+    exports = ["FindPortaudio.cmake",]
 
     WIN = {'build_dirname': "_build"}
 
@@ -50,6 +51,7 @@ class PortaudioConan(ConanFile):
             self.run(build_command)
 
     def package(self):
+        self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
         if self.settings.os == "Windows":
             build_dirname = self.WIN['build_dirname']
