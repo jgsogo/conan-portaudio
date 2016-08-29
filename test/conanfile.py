@@ -18,5 +18,5 @@ class HelloReuseConan(ConanFile):
         self.run("cmake --build . %s" % cmake.build_config)
 
     def test(self):
-        # equal to ./bin/greet, but portable win: .\bin\greet
-        self.run(os.sep.join([".","bin", "greet"]))
+        # equal to ./bin/portaudio_conan_test, but portable win: .\bin\portaudio_conan_test
+        self.run(os.sep.join([".","bin", "portaudio_conan_test"]))
