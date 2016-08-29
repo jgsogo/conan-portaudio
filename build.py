@@ -6,7 +6,7 @@ username = os.getenv("CONAN_USERNAME", "jgsogo")
 
 
 if __name__ == "__main__":
-    builder = ConanMultiPackager(username=username)
+    builder = ConanMultiPackager(username=username, stable_branch_pattern='v19.20140130')
     builder.add_common_builds(shared_option_name="Portaudio:shared")
     filtered_builds = []
     for settings, options in builder.builds:
