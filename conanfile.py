@@ -6,7 +6,7 @@ from conans.tools import os_info, SystemPackageTool, download, untargz, replace_
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
-    version = "v19.20140130"
+    version = "rc.v190600.20161001"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio"
     url = "https://github.com/jgsogo/conan-portaudio"
@@ -28,8 +28,8 @@ class PortaudioConan(ConanFile):
             installer.install(pack_name)  # Install the package
 
     def source(self):
-        zip_name = 'portaudio_v19_20140130.tgz'
-        url = 'http://portaudio.com/archives/pa_stable_v19_20140130.tgz'
+        zip_name = 'pa_rc_v190600_20161001.tgz'
+        url = 'http://www.portaudio.com/archives/pa_rc_v190600_20161001.tgz'
         download(url, zip_name)
         untargz(zip_name)  # Creates a portaudio directory
         os.unlink(zip_name)
