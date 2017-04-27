@@ -1,8 +1,6 @@
-
-import os
+import os, subprocess
 from conans import ConanFile, CMake
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
-
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
@@ -17,10 +15,27 @@ class PortaudioConan(ConanFile):
 
     WIN = {'build_dirname': "_build"}
 
+    def rpm_package_installed(self, package):
+        p = subprocess.Popen(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, _ = p.communicate()
+        return 'install ok' in out or 'not installed' not in out
+
+    def ensure_rpm_dependency(self, package):
+        if not self.rpm_package_installed(package):
+            self.output.warn(package + " is not installed in this machine! Conan will try to install it.")
+            # Note: yum is automatically redirected to dnf on modern Fedora distros (see 'man yum2dnf')
+            self.run("sudo yum install -y " + package)
+            if not self.rpm_package_installed(package):
+                self.output.error(package + " Installation doesn't work... install it manually and try again")
+                exit(1)
+
     def system_requirements(self):
         pack_name = None
         if os_info.is_linux:
-            pack_name = "libasound2-dev"
+            if os_info.with_apt:
+                pack_name = "libasound2-dev"
+            elif os_info.with_yum:
+                self.ensure_rpm_dependency("alsa-lib-devel")
 
         if pack_name:
             installer = SystemPackageTool()
