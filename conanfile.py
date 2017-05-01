@@ -7,6 +7,7 @@ class PortaudioConan(ConanFile):
     version = "rc.v190600.20161001"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio"
+    description = "Conan package for the Portaudio library"
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
     options = {"shared": [True, False]}
@@ -30,7 +31,6 @@ class PortaudioConan(ConanFile):
                 exit(1)
 
     def system_requirements(self):
-        pack_name = None
         if os_info.is_linux:
             if os_info.with_apt:
                 installer = SystemPackageTool()
