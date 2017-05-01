@@ -33,14 +33,13 @@ class PortaudioConan(ConanFile):
         pack_name = None
         if os_info.is_linux:
             if os_info.with_apt:
-                pack_name = "libasound2-dev"
+                installer = SystemPackageTool()
+                installer.update()
+                installer.install("libasound2-dev")
+                installer.install("libjack-dev")
             elif os_info.with_yum:
                 self.ensure_rpm_dependency("alsa-lib-devel")
-
-        if pack_name:
-            installer = SystemPackageTool()
-            installer.update()  # Update the package database
-            installer.install(pack_name)  # Install the package
+                self.ensure_rpm_dependency("jack-audio-connection-kit-devel")
 
     def source(self):
         zip_name = 'pa_rc_v190600_20161001.tgz'
@@ -97,5 +96,9 @@ class PortaudioConan(ConanFile):
             if not self.options.shared:
                 base_name += "_static"
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+        elif self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
+        else:
+            self.cpp_info.exelinkflags.append("-ljack -lasound -lpthread")
+            
         self.cpp_info.libs = [base_name]
-
