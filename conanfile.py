@@ -1,14 +1,13 @@
-
-import os
+import os, subprocess
 from conans import ConanFile, CMake
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
-
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
     version = "rc.v190600.20161001"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio"
+    description = "Conan package for the Portaudio library"
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
     options = {"shared": [True, False]}
@@ -17,15 +16,30 @@ class PortaudioConan(ConanFile):
 
     WIN = {'build_dirname': "_build"}
 
-    def system_requirements(self):
-        pack_name = None
-        if os_info.is_linux:
-            pack_name = "libasound2-dev"
+    def rpm_package_installed(self, package):
+        p = subprocess.Popen(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, _ = p.communicate()
+        return 'install ok' in out or 'not installed' not in out
 
-        if pack_name:
-            installer = SystemPackageTool()
-            installer.update()  # Update the package database
-            installer.install(pack_name)  # Install the package
+    def ensure_rpm_dependency(self, package):
+        if not self.rpm_package_installed(package):
+            self.output.warn(package + " is not installed in this machine! Conan will try to install it.")
+            # Note: yum is automatically redirected to dnf on modern Fedora distros (see 'man yum2dnf')
+            self.run("sudo yum install -y " + package)
+            if not self.rpm_package_installed(package):
+                self.output.error(package + " Installation doesn't work... install it manually and try again")
+                exit(1)
+
+    def system_requirements(self):
+        if os_info.is_linux:
+            if os_info.with_apt:
+                installer = SystemPackageTool()
+                installer.update()
+                installer.install("libasound2-dev")
+                installer.install("libjack-dev")
+            elif os_info.with_yum:
+                self.ensure_rpm_dependency("alsa-lib-devel")
+                self.ensure_rpm_dependency("jack-audio-connection-kit-devel")
 
     def source(self):
         zip_name = 'pa_rc_v190600_20161001.tgz'
@@ -82,5 +96,9 @@ class PortaudioConan(ConanFile):
             if not self.options.shared:
                 base_name += "_static"
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+        elif self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
+        else:
+            self.cpp_info.exelinkflags.append("-ljack -lasound -lpthread")
+            
         self.cpp_info.libs = [base_name]
-
