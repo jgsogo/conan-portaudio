@@ -12,8 +12,5 @@ if __name__ == "__main__":
     for settings, options, env_vars, build_requires in builder.builds:
         if settings["arch"] == "x86_64" and settings["build_type"] == "Release":
             filtered_builds.append([settings, options, env_vars, build_requires])
-    from pprint import pprint
-    pprint(filtered_builds)
-    exit()
     builder.builds = filtered_builds
     builder.run()
