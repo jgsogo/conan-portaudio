@@ -93,6 +93,6 @@ class PortaudioConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
         else:
-            self.cpp_info.exelinkflags.append("-ljack -lasound -lpthread")
+            self.cpp_info.exelinkflags.append("-ljack -lm -lasound -lpthread")
             
         self.cpp_info.libs = [base_name]
