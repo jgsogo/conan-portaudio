@@ -1,16 +1,11 @@
-
 project(PortaudioConanTest)
 cmake_minimum_required(VERSION 2.8.12)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package("Portaudio")
 
-IF(PORTAUDIO_FOUND)
-    add_executable(portaudio_conan_test pa_devs.c)
-    include_directories(${PORTAUDIO_INCLUDE_DIRS})
-    target_link_libraries(portaudio_conan_test PUBLIC ${PORTAUDIO_LIBRARIES})
-ELSE()
-    message(FATAL_ERROR "Portaudio not found")
-ENDIF()
+add_executable(portaudio_conan_test pa_devs.c)
+target_link_libraries(portaudio_conan_test PUBLIC ${CONAN_LIBS})
+set_target_properties(portaudio_conan_test PROPERTIES LINK_FLAGS "${CONAN_EXE_LINKER_FLAGS}")
+
