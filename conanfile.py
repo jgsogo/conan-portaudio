@@ -20,7 +20,7 @@ class PortaudioConan(ConanFile):
     def system_requirements(self):
         pack_name = None
         if os_info.is_linux:
-            pack_name = "libasound2 libasound2-dev"
+            pack_name = "libasound2-dev"
 
         if pack_name:
             installer = SystemPackageTool()
