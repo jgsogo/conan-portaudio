@@ -1,5 +1,5 @@
 import os, subprocess
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
 
 class PortaudioConan(ConanFile):
@@ -10,8 +10,8 @@ class PortaudioConan(ConanFile):
     description = "Conan package for the Portaudio library"
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "fPIC=True"
     exports = ["FindPortaudio.cmake",]
 
     WIN = {'build_dirname': "_build"}
@@ -46,8 +46,12 @@ class PortaudioConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            command = './configure && make'
-            self.run("cd %s && %s" % (self.FOLDER_NAME, command))
+            env = AutoToolsBuildEnvironment(self)
+            with tools.environment_append(env.vars):
+                env.fpic = self.options.fPIC
+                with tools.environment_append(env.vars):
+                    command = './configure && make'
+                    self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
             # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
             replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
