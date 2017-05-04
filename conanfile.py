@@ -11,7 +11,7 @@ class PortaudioConan(ConanFile):
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = "shared=False", "fPIC=False"
+    default_options = "shared=False", "fPIC=True"
     exports = ["FindPortaudio.cmake",]
 
     WIN = {'build_dirname': "_build"}
@@ -86,7 +86,11 @@ class PortaudioConan(ConanFile):
                 else:
                     self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
             else:
-                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                if self.settings.os =="Macos":
+                    self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                else:
+                    self.output.warn("Static library doesn't work on linux. Packaging .so files only.")
+                    self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
 
     def package_info(self):
         base_name = "portaudio"
@@ -96,7 +100,4 @@ class PortaudioConan(ConanFile):
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
         elif self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
-        else:
-            self.cpp_info.exelinkflags.append("-ljack -lasound -lm -lpthread")
-            
         self.cpp_info.libs = [base_name]
