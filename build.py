@@ -1,9 +1,7 @@
 from conan.packager import ConanMultiPackager
-import os
-
+import os, platform
 
 username = os.getenv("CONAN_USERNAME", "jgsogo")
-
 
 if __name__ == "__main__":
     builder = ConanMultiPackager(username=username)
