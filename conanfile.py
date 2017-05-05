@@ -1,6 +1,6 @@
 
-import os
-from conans import ConanFile, CMake
+import os, subprocess
+from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
 
 
@@ -9,23 +9,39 @@ class PortaudioConan(ConanFile):
     version = "v19.20140130"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio"
+    description = "Conan package for the Portaudio library"
     url = "https://github.com/jgsogo/conan-portaudio"
     license = "http://www.portaudio.com/license.html"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "fPIC=True"
     exports = ["FindPortaudio.cmake",]
 
     WIN = {'build_dirname': "_build"}
 
-    def system_requirements(self):
-        pack_name = None
-        if os_info.is_linux:
-            pack_name = "libasound2-dev"
+    def rpm_package_installed(self, package):
+        p = subprocess.Popen(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, _ = p.communicate()
+        return 'install ok' in out or 'not installed' not in out
 
-        if pack_name:
-            installer = SystemPackageTool()
-            installer.update()  # Update the package database
-            installer.install(pack_name)  # Install the package
+    def ensure_rpm_dependency(self, package):
+        if not self.rpm_package_installed(package):
+            self.output.warn(package + " is not installed in this machine! Conan will try to install it.")
+            # Note: yum is automatically redirected to dnf on modern Fedora distros (see 'man yum2dnf')
+            self.run("sudo yum install -y " + package)
+            if not self.rpm_package_installed(package):
+                self.output.error(package + " Installation doesn't work... install it manually and try again")
+                exit(1)
+
+    def system_requirements(self):
+        if os_info.is_linux:
+            if os_info.with_apt:
+                installer = SystemPackageTool()
+                installer.update()
+                installer.install("libasound2-dev")
+                installer.install("libjack-dev")
+            elif os_info.with_yum:
+                self.ensure_rpm_dependency("alsa-lib-devel")
+                self.ensure_rpm_dependency("jack-audio-connection-kit-devel")
 
     def source(self):
         zip_name = 'portaudio_v19_20140130.tgz'
@@ -38,8 +54,12 @@ class PortaudioConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            command = './configure && make'
-            self.run("cd %s && %s" % (self.FOLDER_NAME, command))
+            env = AutoToolsBuildEnvironment(self)
+            with tools.environment_append(env.vars):
+                env.fpic = self.options.fPIC
+                with tools.environment_append(env.vars):
+                    command = './configure && make'
+                    self.run("cd %s && %s" % (self.FOLDER_NAME, command))
         else:
             # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
             replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
@@ -74,7 +94,11 @@ class PortaudioConan(ConanFile):
                 else:
                     self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
             else:
-                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                if self.settings.os =="Macos":
+                    self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                else:
+                    self.output.warn("Static library doesn't work on linux. Packaging .so files only.")
+                    self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
 
     def package_info(self):
         base_name = "portaudio"
@@ -82,5 +106,6 @@ class PortaudioConan(ConanFile):
             if not self.options.shared:
                 base_name += "_static"
             base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+        elif self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
         self.cpp_info.libs = [base_name]
-
