@@ -2,14 +2,8 @@
 from conans import ConanFile, CMake
 import os
 
-# This easily allows to copy the package in other user or channel
-channel = os.getenv("CONAN_CHANNEL", "testing")
-username = os.getenv("CONAN_USERNAME", "jgsogo")
-
-
-class HelloReuseConan(ConanFile):
+class TestPortaudio(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "portaudio/master@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):
