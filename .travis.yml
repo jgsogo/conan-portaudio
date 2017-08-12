@@ -6,8 +6,8 @@ language: python
 env:
   global:
     - CONAN_REFERENCE="portaudio/master"
-    - CONAN_USERNAME="dimi309"
-    - CONAN_CHANNEL="temp"
+    - CONAN_USERNAME="jgsogo"
+    - CONAN_CHANNEL="stable"
     - CONAN_TOTAL_PAGES=1
     - CONAN_CURRENT_PAGE=1
     - CONAN_REMOTES="https://api.bintray.com/conan/dimi309/conan-packages"
