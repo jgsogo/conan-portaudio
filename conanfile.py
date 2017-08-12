@@ -18,6 +18,8 @@ class PortaudioConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        if self.settings.os == "Windows":
+            self.options.remove("fPIC")
 
     def system_requirements(self):
         if os_info.is_linux:
@@ -58,13 +60,16 @@ class PortaudioConan(ConanFile):
         else:
             # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
             replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
+
             if self.settings.compiler == "gcc":
                 replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" ON)', 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" OFF)')
                 replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" ON)', 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" OFF)')
                 replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WASAPI "Enable support for WASAPI" ON)', 'OPTION(PA_USE_WASAPI "Enable support for WASAPI" OFF)')
 
             build_dirname = self.WIN['build_dirname']
+
             cmake = CMake(self.settings)
+
             if self.settings.os == "Windows":
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
             else:
@@ -81,6 +86,7 @@ class PortaudioConan(ConanFile):
     def package(self):
         self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
+        
         if self.settings.os == "Windows":
             build_dirname = self.WIN['build_dirname']
             if self.settings.compiler == "Visual Studio":
@@ -120,4 +126,5 @@ class PortaudioConan(ConanFile):
             
         elif self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
+
         self.cpp_info.libs = [base_name]
