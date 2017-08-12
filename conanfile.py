@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
-from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file, unzip
+from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file, unzip, ConanException
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
@@ -20,6 +20,8 @@ class PortaudioConan(ConanFile):
         del self.settings.compiler.libcxx
         if self.settings.os == "Windows":
             self.options.remove("fPIC")
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and not self.options.shared:
+            raise ConanException("Portaudio cannot be built as a static library in MinGW for the time being. Use -o portaudio:shared=True.")
 
     def system_requirements(self):
         if os_info.is_linux:

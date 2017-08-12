@@ -1,4 +1,3 @@
-
 from conans import ConanFile, CMake
 import os
 
@@ -14,3 +13,10 @@ class TestPortaudio(ConanFile):
     def test(self):
         # equal to ./bin/portaudio_conan_test, but portable win: .\bin\portaudio_conan_test
         self.run(os.sep.join([".","bin", "portaudio_conan_test"]))
+
+    def imports(self):
+        if self.settings.os == "Windows":
+            self.copy(pattern="*.dll", dst="bin", src="bin")
+            self.copy(pattern="*.pdb", dst="bin", src="bin")
+	if self.settings.os == "Macos":
+            self.copy(pattern="*.dylib", dst="bin", src="lib")
