@@ -12,7 +12,7 @@ class TestPortaudio(ConanFile):
 
     def test(self):
         # equal to ./bin/portaudio_conan_test, but portable win: .\bin\portaudio_conan_test
-        self.run(os.sep.join([".","bin", "portaudio_conan_test"]))
+        self.run(os.sep.join(["cd bin && .", "portaudio_conan_test"]))
 
     def imports(self):
         if self.settings.os == "Windows":
