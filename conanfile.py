@@ -58,7 +58,7 @@ class PortaudioConan(ConanFile):
                     command = './configure && make'
                     self.run("cd %s && %s" % (self.FOLDER_NAME, command))
             if self.settings.os == "Macos" and self.options.shared:
-                self.run('cd lib/.libs && for filename in *.dylib; do install_name_tool -id $filename $filename; done')
+                self.run('cd _build/lib/.libs && for filename in *.dylib; do install_name_tool -id $filename $filename; done')
         else:
             # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
             replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
