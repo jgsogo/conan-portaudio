@@ -109,11 +109,8 @@ class PortaudioConan(ConanFile):
                 else:
                     self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
             else:
-                if self.settings.os =="Macos":
-                    self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
-                else:
-                    self.output.warn("Static library doesn't work on linux. Packaging .so files only.")
-                    self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+
 
     def package_info(self):
         base_name = "portaudio"
@@ -131,3 +128,6 @@ class PortaudioConan(ConanFile):
 
         if self.settings.os == "Windows" and self.settings.compiler == "gcc" and not self.options.shared:
             self.cpp_info.libs.append('winmm')
+
+        if self.settings.os == "Linux" and not self.options.shared:
+            self.cpp_info.libs.append('jack asound m pthread')
