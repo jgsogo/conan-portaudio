@@ -5,8 +5,8 @@ environment:
     PYTHON_ARCH: "64"
 
     CONAN_REFERENCE: "portaudio/master"
-    CONAN_USERNAME: "dimi309"
-    CONAN_CHANNEL: "temp"
+    CONAN_USERNAME: "jgsogo"
+    CONAN_CHANNEL: "stable"
     CONAN_TOTAL_PAGES: 4
     CONAN_REMOTES: "https://api.bintray.com/conan/jgsogo/conan-packages"
     CONAN_UPLOAD: "https://api.bintray.com/conan/jgsogo/conan-packages"
