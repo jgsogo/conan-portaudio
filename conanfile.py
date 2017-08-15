@@ -105,6 +105,7 @@ class PortaudioConan(ConanFile):
         else:
             if self.options.shared:
                 if self.settings.os == "Macos":
+                    self.run('cd lib/.libs && for filename in *.dylib; do install_name_tool -id $filename $filename; done')
                     self.copy(pattern="*.dylib", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
                 else:
                     self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
