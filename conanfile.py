@@ -4,7 +4,7 @@ from conans.tools import os_info, SystemPackageTool, download, untargz, replace_
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
-    version = "master"
+    version = "v190600.20161030"
     settings = "os", "compiler", "build_type", "arch"
     FOLDER_NAME = "portaudio"
     description = "Conan package for the Portaudio library"

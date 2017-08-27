@@ -4,7 +4,7 @@ environment:
     PYTHON_VERSION: "2.7.11"
     PYTHON_ARCH: "64"
 
-    CONAN_REFERENCE: "portaudio/master"
+    CONAN_REFERENCE: "portaudio/v190600.20161030"
     CONAN_USERNAME: "jgsogo"
     CONAN_CHANNEL: "stable"
     CONAN_TOTAL_PAGES: 4

@@ -5,7 +5,7 @@ sudo: required
 language: python
 env:
   global:
-    - CONAN_REFERENCE="portaudio/master"
+    - CONAN_REFERENCE="portaudio/v190600.20161030"
     - CONAN_USERNAME="jgsogo"
     - CONAN_CHANNEL="stable"
     - CONAN_TOTAL_PAGES=1

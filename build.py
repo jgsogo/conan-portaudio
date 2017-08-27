@@ -2,7 +2,7 @@ from conan.packager import ConanMultiPackager
 import os, platform
 
 if __name__ == "__main__":
-    builder = ConanMultiPackager(stable_branch_pattern='master')
+    builder = ConanMultiPackager(stable_branch_pattern='v190600.20161030')
     builder.add_common_builds(shared_option_name="portaudio:shared")
     filtered_builds = []
     for settings, options, env_vars, build_requires in builder.builds:
