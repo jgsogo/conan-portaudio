@@ -1,6 +1,6 @@
-import os, subprocess
+import os
 from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
-from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file
+from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file, unzip
 
 class PortaudioConan(ConanFile):
     name = "portaudio"
@@ -16,33 +16,38 @@ class PortaudioConan(ConanFile):
 
     WIN = {'build_dirname': "_build"}
 
-    def rpm_package_installed(self, package):
-        p = subprocess.Popen(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, _ = p.communicate()
-        return 'install ok' in out or 'not installed' not in out
-
-    def ensure_rpm_dependency(self, package):
-        if not self.rpm_package_installed(package):
-            self.output.warn(package + " is not installed in this machine! Conan will try to install it.")
-            # Note: yum is automatically redirected to dnf on modern Fedora distros (see 'man yum2dnf')
-            self.run("sudo yum install -y " + package)
-            if not self.rpm_package_installed(package):
-                self.output.error(package + " Installation doesn't work... install it manually and try again")
-                exit(1)
+    def configure(self):
+        del self.settings.compiler.libcxx
+        if self.settings.os == "Windows":
+            self.options.remove("fPIC")
 
     def system_requirements(self):
         if os_info.is_linux:
             if os_info.with_apt:
                 installer = SystemPackageTool()
-                installer.update()
                 installer.install("libasound2-dev")
                 installer.install("libjack-dev")
             elif os_info.with_yum:
-                self.ensure_rpm_dependency("alsa-lib-devel")
-                self.ensure_rpm_dependency("jack-audio-connection-kit-devel")
+                installer = SystemPackageTool()
+                installer.install("alsa-lib-devel")
+                installer.install("jack-audio-connection-kit-devel")
 
     def source(self):
-        self.run("git clone https://git.assembla.com/portaudio.git {}".format(self.FOLDER_NAME))
+        zip_name = 'portaudio_%s' % self.version
+        if self.version == 'master':
+            self.run('mkdir portaudio')
+            zip_name += '.zip'
+            download('https://app.assembla.com/spaces/portaudio/git/source/master?_format=zip', 'portaudio/%s' % zip_name)
+            unzip('portaudio/%s' % zip_name, 'portaudio/')
+            os.unlink('portaudio/%s' % zip_name)
+        else:
+            zip_name += '.tgz'
+            download('http://portaudio.com/archives/pa_stable_%s.tgz' % self.version, zip_name)
+            untargz(zip_name)
+            os.unlink(zip_name)
+
+        if self.settings.os != "Windows":
+            self.run("chmod +x ./%s/configure" % self.FOLDER_NAME)
 
     def build(self):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
@@ -52,12 +57,21 @@ class PortaudioConan(ConanFile):
                 with tools.environment_append(env.vars):
                     command = './configure && make'
                     self.run("cd %s && %s" % (self.FOLDER_NAME, command))
+            if self.settings.os == "Macos" and self.options.shared:
+                self.run('cd portaudio/lib/.libs && for filename in *.dylib; do install_name_tool -id $filename $filename; done')
         else:
             # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
             replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
 
+            if self.settings.compiler == "gcc":
+                replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" ON)', 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" OFF)')
+                replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" ON)', 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" OFF)')
+                replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WASAPI "Enable support for WASAPI" ON)', 'OPTION(PA_USE_WASAPI "Enable support for WASAPI" OFF)')
+
             build_dirname = self.WIN['build_dirname']
+
             cmake = CMake(self.settings)
+
             if self.settings.os == "Windows":
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
             else:
@@ -74,11 +88,22 @@ class PortaudioConan(ConanFile):
     def package(self):
         self.copy("FindPortaudio.cmake", ".", ".")
         self.copy("*.h", dst="include", src=os.path.join(self.FOLDER_NAME, "include"))
+
+        self.copy(pattern="LICENSE*", dst="licenses", src=self.FOLDER_NAME,  ignore_case=True, keep_path=False)
+        
         if self.settings.os == "Windows":
             build_dirname = self.WIN['build_dirname']
-            self.copy("*.lib", dst="lib", src=os.path.join(build_dirname, str(self.settings.build_type)))
-            if self.options.shared:
-                self.copy("*.dll", dst="bin", src=os.path.join(build_dirname, str(self.settings.build_type)))
+            if self.settings.compiler == "Visual Studio":
+                self.copy("*.lib", dst="lib", src=os.path.join(build_dirname, str(self.settings.build_type)))
+                if self.options.shared:
+                    self.copy("*.dll", dst="bin", src=os.path.join(build_dirname, str(self.settings.build_type)))
+            else:
+                if self.options.shared:
+                    self.copy(pattern="*.dll.a", dst="lib", keep_path=False)
+                    self.copy(pattern="*.dll", dst="bin", keep_path=False)
+                else:
+                    self.copy(pattern="*static.a", dst="lib", keep_path=False)
+                
         else:
             if self.options.shared:
                 if self.settings.os == "Macos":
@@ -86,18 +111,25 @@ class PortaudioConan(ConanFile):
                 else:
                     self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
             else:
-                if self.settings.os =="Macos":
-                    self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
-                else:
-                    self.output.warn("Static library doesn't work on linux. Packaging .so files only.")
-                    self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+                self.copy("*.a", dst="lib", src=os.path.join(self.FOLDER_NAME, "lib", ".libs"))
+
 
     def package_info(self):
         base_name = "portaudio"
         if self.settings.os == "Windows":
             if not self.options.shared:
                 base_name += "_static"
-            base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+                
+            if self.settings.compiler == "Visual Studio":
+                base_name += "_x86" if self.settings.arch == "x86" else "_x64"
+            
         elif self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices -framework Carbon")
+
         self.cpp_info.libs = [base_name]
+
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and not self.options.shared:
+            self.cpp_info.libs.append('winmm')
+
+        if self.settings.os == "Linux" and not self.options.shared:
+            self.cpp_info.libs.append('jack asound m pthread')
