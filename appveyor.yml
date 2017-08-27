@@ -4,11 +4,12 @@ environment:
     PYTHON_VERSION: "2.7.11"
     PYTHON_ARCH: "64"
 
-    CONAN_UPLOAD: 1
     CONAN_REFERENCE: "portaudio/v19.20140130"
     CONAN_USERNAME: "jgsogo"
-    CONAN_CHANNEL: "ci"
+    CONAN_CHANNEL: "stable"
     CONAN_TOTAL_PAGES: 4
+    CONAN_REMOTES: "https://api.bintray.com/conan/jgsogo/conan-packages"
+    CONAN_UPLOAD: "https://api.bintray.com/conan/jgsogo/conan-packages"
 
     matrix:
         - CONAN_CURRENT_PAGE: 1
@@ -17,8 +18,9 @@ environment:
         - CONAN_CURRENT_PAGE: 4
 install:
   - set PATH=%PATH%;%PYTHON%/Scripts/
-  - C:/Python27-x64/Scripts/pip.exe install conan_package_tools # It installs conan too
-  - conan user # It creates the conan data directory
+  - C:/Python27-x64/Scripts/pip.exe install conan_package_tools 
+  - conan user
 
 test_script:
   - C:\Python27-x64\python build.py
+
