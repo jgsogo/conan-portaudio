@@ -42,7 +42,6 @@ class PortaudioConan(ConanFile):
             unzip('portaudio/%s' % zip_name, 'portaudio/')
             os.unlink('portaudio/%s' % zip_name)
         else:
-            zip_name += '.tgz'
             download('http://portaudio.com/archives/pa_stable_%s.tgz' % self.version, zip_name)
             untargz(zip_name)
             os.unlink(zip_name)
