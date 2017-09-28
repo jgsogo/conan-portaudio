@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file, unzip
 
-class PortaudioConan(ConanFile):
+class ConanRecipe(ConanFile):
     name = "portaudio"
     version = "master"
     settings = "os", "compiler", "build_type", "arch"
