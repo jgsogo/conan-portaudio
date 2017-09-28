@@ -14,7 +14,8 @@ $> conan remote add jgsogo-conan-packages https://api.bintray.com/conan/jgsogo/c
 ## Build status
 
  * `master` branch (package version) use last revision from the Portaudio repository.
-
+ * `v19.20140130` branch (package version) use version v19.20140130 of Portaudio.
+ 
 <table>
     <thead>
         <tr>
@@ -45,5 +46,16 @@ $> conan remote add jgsogo-conan-packages https://api.bintray.com/conan/jgsogo/c
         <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/master/3" alt="Build status"/></a></td>
         <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/master/4" alt="Build status"/></a></td>
         <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/master/5" alt="Build status"/></a></td>
+    </tr>
+    <tr>
+        <td>v19.20140130</td>
+        <td><a href="https://ci.appveyor.com/project/jgsogo/conan-portaudio"><img src="https://appveyor-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branch/v19.20140130/1" alt="Build status"/></a></td>        
+        <td><a href="https://ci.appveyor.com/project/jgsogo/conan-portaudio"><img src="https://appveyor-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branch/v19.20140130/2" alt="Build status"/></a></td>        
+        <td><a href="https://ci.appveyor.com/project/jgsogo/conan-portaudio"><img src="https://appveyor-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branch/v19.20140130/3" alt="Build status"/></a></td>        
+        <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/v19.20140130/1" alt="Build status"/></a></td>
+        <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/v19.20140130/2" alt="Build status"/></a></td>
+        <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/v19.20140130/3" alt="Build status"/></a></td>
+        <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/v19.20140130/4" alt="Build status"/></a></td>
+        <td><a href="https://travis-ci.org/jgsogo/conan-portaudio"><img src="https://travis-matrix-badges.herokuapp.com/repos/jgsogo/conan-portaudio/branches/v19.20140130/5" alt="Build status"/></a></td>
     </tr>
 </table>
