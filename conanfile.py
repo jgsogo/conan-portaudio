@@ -2,8 +2,7 @@ import os
 from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
 from conans.tools import os_info, SystemPackageTool, download, untargz, replace_in_file, unzip
 
-
-class PortaudioConan(ConanFile):
+class ConanRecipe(ConanFile):
     name = "portaudio"
     version = "v19.20140130"
     settings = "os", "compiler", "build_type", "arch"
@@ -61,9 +60,6 @@ class PortaudioConan(ConanFile):
             if self.settings.os == "Macos" and self.options.shared:
                 self.run('cd portaudio/lib/.libs && for filename in *.dylib; do install_name_tool -id $filename $filename; done')
         else:
-            # We must disable ksguid.lib: https://app.assembla.com/spaces/portaudio/tickets/228-ksguid-lib-linker-issues/details
-            replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)", "ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -DPAWIN_WDMKS_NO_KSGUID_LIB)")
-
             if self.settings.compiler == "gcc":
                 replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" ON)', 'OPTION(PA_USE_WDMKS "Enable support for WDMKS" OFF)')
                 replace_in_file(os.path.join(self.FOLDER_NAME, "CMakeLists.txt"), 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" ON)', 'OPTION(PA_USE_WDMKS_DEVICE_INFO "Use WDM/KS API for device info" OFF)')
