@@ -15,6 +15,7 @@ $> conan remote add jgsogo-conan-packages https://api.bintray.com/conan/jgsogo/c
 
  * `master` branch (package version) use last revision from the Portaudio repository.
  * `v19.20140130` branch (package version) use version v19.20140130 of Portaudio.
+   - in MacOS it is compiled with apple-clang 7.3 version.
  * `v190600.20161030` branch (package version) use version v190600.20161030 of Portaudio.
  
  
