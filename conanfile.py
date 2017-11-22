@@ -79,7 +79,7 @@ elif xcodebuild -version -sdk macosx10.13 Path >/dev/null 2>&1 ; then
 
             build_dirname = self.WIN['build_dirname']
 
-            cmake = CMake(self.settings)
+            cmake = CMake(self)
 
             if self.settings.os == "Windows":
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
