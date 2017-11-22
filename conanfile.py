@@ -50,6 +50,18 @@ class ConanRecipe(ConanFile):
             self.run("chmod +x ./%s/configure" % self.FOLDER_NAME)
 
     def build(self):
+        if self.settings.os == "Macos":
+            replace_in_file(os.path.join(self.FOLDER_NAME, "configure"), 'mac_sysroot="-isysroot `xcodebuild -version -sdk macosx10.12 Path`"',
+"""
+mac_sysroot="-isysroot `xcodebuild -version -sdk macosx10.12 Path`"
+elif xcodebuild -version -sdk macosx10.13 Path >/dev/null 2>&1 ; then
+                 mac_version_min="-mmacosx-version-min=10.4"
+                 mac_sysroot="-isysroot `xcodebuild -version -sdk macosx10.13 Path`"
+
+"""
+                        )
+            replace_in_file(os.path.join(self.FOLDER_NAME, "configure"), "Could not find 10.5 to 10.12 SDK.", "Could not find 10.5 to 10.13 SDK.")
+        
         if self.settings.os == "Linux" or self.settings.os == "Macos":
             env = AutoToolsBuildEnvironment(self)
             with tools.environment_append(env.vars):
@@ -67,7 +79,7 @@ class ConanRecipe(ConanFile):
 
             build_dirname = self.WIN['build_dirname']
 
-            cmake = CMake(self.settings)
+            cmake = CMake(self)
 
             if self.settings.os == "Windows":
                 self.run("IF not exist {} mkdir {}".format(build_dirname, build_dirname))
